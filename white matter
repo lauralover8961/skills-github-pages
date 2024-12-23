@@ -1,0 +1,132 @@
+import pandas as pd
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+
+# 读取CSV文件
+data = pd.read_csv('C://Users//laura//Desktop//whitematter_erfenlei.csv')
+
+# 假设你的目标变量在列 'target' 中，特征在其他列中
+X = data.drop('Fazekas2', axis=1)  # 特征矩阵
+y = data['Fazekas2']  # 目标变量
+
+# 选择前10个最相关的特征
+selector = SelectKBest(score_func=f_classif, k=10)
+X_new = selector.fit_transform(X, y)
+
+# 打印出被选中的特征的索引
+selected_features = selector.get_support(indices=True)
+print(selected_features)
+import pandas as pd
+
+# 假设你的数据已经读取为DataFrame，并且列名是col1, col2, col3, ...
+column_indices = [ 1,2,4, 10, 12, 13,14,35,36,44]
+
+# 将列名转换为列表
+column_names = list(data.columns[column_indices])
+
+print(column_names)
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# 假设你的数据已经准备好，特征矩阵为X_new，目标变量为y
+# 假设selected_features是你筛选出的重点关注的指标的列表
+selected_features = ['geneder', 'age', 'CI', 'xiaonaozhongjiao_corr-CBF', 'ccxibu_corr-CBF', 'cctibu_corr-CBF', 'ccyabu_corr-CBF', 'shangfusheguan_L_corr-CBF', 'houfusheguan_R_corr-CBF', 'koudaihui_R_corr-CBF']
+# 从原始数据中提取特征矩阵X_new和目标变量y
+X_new = data[selected_features]
+y = data['Fazekas2']
+
+
+# 拆分数据集为训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.25, random_state=42)
+
+# 初始化随机森林分类器模型
+model = RandomForestClassifier()
+
+# 训练模型
+model.fit(X_train, y_train)
+
+# 使用训练好的模型对测试集进行预测
+y_pred = model.predict(X_test)
+
+# 评估模型性能
+accuracy = accuracy_score(y_test, y_pred)
+print("模型准确率：", accuracy)
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+
+# 假设 y_true 是真实的目标变量，y_score 是模型的预测分数
+fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+roc_auc = auc(fpr, tpr)
+
+# 绘制AUC曲线
+plt.figure()
+plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc="lower right")
+plt.show()
+# 获取特征重要性
+feature_importances = model.feature_importances_
+
+# 打印特征重要性
+print("特征重要性：")
+for i in range(len(selected_features)):
+    print(f"{selected_features[i]}: {feature_importances[i]}")
+import matplotlib.pyplot as plt
+
+# 创建柱状图
+plt.figure(figsize=(10, 6))
+plt.barh(selected_features, feature_importances, color='skyblue')
+plt.xlabel('Feature Importance')
+plt.ylabel('Features')
+plt.title('Feature Importances of Random Forest Model')
+plt.show()
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+
+# 假设 model 是您训练好的模型
+y_pred_prob = model.predict_proba(X_test)[:, 1]  # 获取预测为正类别的概率值
+
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
+roc_auc = auc(fpr, tpr)
+
+# 绘制AUC曲线
+plt.figure()
+plt.plot(fpr, tpr, color='darkorange', marker='o',lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc="lower right")
+plt.show()
+import seaborn as sns
+plt.figure(figsize=(12,10),dpi=300)
+sns.heatmap(X_train.corr()
+           ,xticklabels=X_train.corr().columns
+           ,yticklabels=X_train.corr().columns
+           ,cmap='RdYlGn'
+           ,center=0
+           ,annot=True)
+plt.title('Correlogram of features',fontsize=22)
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.show()
+y_test_pred=model.predict(X_test)
+print(classification_report(y_test,y_test_pred))
+from sklearn.metrics import roc_curve, auc
+
+# 假设y_true是真实标签，y_score是预测得分
+fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+roc_auc = auc(fpr, tpr)
+
+# 计算灵敏度和特异度
+sensitivity = tpr
+specificity = 1 - fpr
+
+# 打印结果
+print("Sensitivity:", sensitivity)
+print("Specificity:", specificity)
